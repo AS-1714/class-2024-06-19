@@ -1,0 +1,6 @@
+- source: project
+  quarto-pub:
+    - id: 8b6b5cca-ebc0-4f90-bec5-deddd2982fd1
+      url: 'https://as-1714.quarto.pub/httpsas-1714quartopubla-degrees'
+    - id: 18fc5a1f-fa3e-4f40-8a0b-ed6dc17e3f87
+      url: 'https://as-1714.quarto.pub/la-degrees'
