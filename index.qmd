@@ -1,0 +1,80 @@
+---
+title: "Bachelor Degrees in LA"
+execute: 
+  echo: false
+  warning: false
+  message: false
+  
+---
+
+```{r}
+#| message:  false
+
+# Install and load required packages
+library(tidycensus)
+library(dplyr)
+
+# Set your Census API key
+census_api_key("61105a1f4402407ecf36a7a52880bffb856cdaa3")
+
+# Download ACS data for the percentage of people with bachelor's degrees in LA census tracts
+la_tracts <- get_acs(
+  geography = "tract",
+  variables = c(bachelors = "B15003_022", total = "B15003_001"),
+  state = "CA",
+  county = "Los Angeles County",
+  year = 2020,
+  survey = "acs5"
+)
+
+# Calculate the percentage of people with bachelor's degrees
+la_tracts <- la_tracts %>%
+  group_by(GEOID) %>%
+  summarise(
+    bachelors = sum(estimate[variable == "bachelors"]),
+    total = sum(estimate[variable == "total"])
+  ) %>%
+  mutate(percentage_bachelors = (bachelors / total) * 100)
+
+# View the first few rows of the result
+head(la_tracts)
+```
+
+```{r}
+#| message:  false
+
+library(leaflet)
+
+# Example tibble (replace this with your actual tibble)
+# Ensure your tibble has columns: GEOID, percentage_bachelors, latitude, longitude
+x <- tibble::tibble(
+  GEOID = c("06037101100", "06037101200", "06037101300"),
+  percentage_bachelors = c(25.3, 30.2, 15.4),
+  latitude = c(34.0522, 34.0622, 34.0722),
+  longitude = c(-118.2437, -118.2537, -118.2637)
+)
+# Create a color palette for the percentages
+pal <- colorNumeric(palette = "YlOrRd", domain = x$percentage_bachelors)
+
+# Create the leaflet map
+leaflet(x) %>%
+  addTiles() %>%
+  addCircles(
+    lng = ~longitude,
+    lat = ~latitude,
+    weight = 1,
+    radius = ~percentage_bachelors * 100,  # Scale the radius based on the percentage
+    color = ~pal(percentage_bachelors),
+    fillOpacity = 0.7,
+    popup = ~paste("GEOID:", GEOID, "<br>",
+                   "Percentage with Bachelor's Degrees:", percentage_bachelors, "%")
+  ) %>%
+  addLegend(
+    "bottomright",
+    pal = pal,
+    values = ~percentage_bachelors,
+    title = "Percentage with Bachelor's Degrees",
+    opacity = 1
+  )
+```
+
